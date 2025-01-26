@@ -1,0 +1,50 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+
+#root,
+.App {
+  position: fixed;
+  top: 0;
+}
+
+#root,
+.App,
+#slider * {
+  color: transparent;
+}
+
+
+video {
+  object-fit: fill;
+  object-position: center;
+}
+
+#slide video,
+#slide iframe {
+  position: absolute;
+  z-index: 10;
+  width: 100%;
+  height: 1000%;
+}
+
+@keyframes shine {
+  0% {
+    background-position: -100%;
+  }
+  100% {
+    background-position: 200%;
+  }
+}
+
+.shining-text {
+  position: relative;
+  display: inline-block;
+  color: #ffffff; /* Warna teks default */
+  background: linear-gradient(90deg, #ffffff 20%, #ffdd00 50%, #ffffff 80%);
+  background-clip: text;
+  color: transparent;
+  background-size: 200%;
+  animation: shine 3s linear infinite;
+}

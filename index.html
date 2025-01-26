@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IDM - Information Digital Media</title>
+    <script>
+      // Panggil API Electron untuk mendapatkan data
+      window.electronAPI.getInitialData().then(({ generalData, localData }) => {
+        console.log("General Data:", generalData);
+        console.log("Local Data:", localData);
+  
+        // Contoh: Memaparkan mesej dari generalData
+        // document.getElementById("message").textContent = generalData.main.message;
+      });
+      
+      // Mendengar perubahan data dari proses utama
+      window.electronAPI.onDataUpdate(({ generalData, localData }) => {
+        console.log("Data telah dikemas kini:", { generalData, localData });
+        // document.getElementById("message").textContent = generalData.main.message;
+      });
+    </script>
+  </head>
+  <body>
+    <div id="root" class="fixed top-0 flex flex-col w-screen h-screen"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
