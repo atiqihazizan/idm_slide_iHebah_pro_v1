@@ -1,10 +1,10 @@
 import { useContextState } from "../contextState"
-import Popup from "./screen/Popup"
-import Slider from "./screen/Slider"
+import Popup from "./carousel/Popup"
+import Slider from "./carousel/Slider"
 
-const Presentation = () => {
+const Carousel = () => {
   const { isPopup } = useContextState()
   return isPopup ? <Popup /> : <Slider />
 }
 
-export default Presentation
+export default Carousel

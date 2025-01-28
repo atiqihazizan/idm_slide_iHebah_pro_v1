@@ -10,7 +10,15 @@ const Slider = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [pause, setPause] = useState(true);
   const [isFirstTime, setIsFirstTime] = useState(true);
-  const [sliderData, setSliderData] = useState([])
+  const [sliderData, setSliderData] = useState([
+    {
+      "type": "image",
+      "time": "2",
+      "src": "./images/bg0.png",
+      "title": "Welcome Indoor Digital Media",
+      "path": ""
+    }
+  ])
   const minSlideTime = 2500;
 
   const nextSlide = () => {
@@ -59,16 +67,15 @@ const Slider = () => {
     setPause(true)
     if (dataSlide) {
       setSliderData(dataSlide);
-      const checkSlider = setInterval(() => {
-        if (slideRef.current) {
-          imageSlider.reload();
-          setPause(false);
-          clearInterval(checkSlider);
-        }
-      }, 100);
-      return () => clearInterval(checkSlider);
-
     }
+    const checkSlider = setInterval(() => {
+      if (slideRef.current) {
+        imageSlider.reload();
+        setPause(false);
+        clearInterval(checkSlider);
+      }
+    }, 100);
+    return () => clearInterval(checkSlider);
   }, [dataSlide]);
 
   if (loading) return <p>Loading...</p>;

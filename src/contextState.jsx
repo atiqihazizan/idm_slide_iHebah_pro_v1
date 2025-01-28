@@ -11,7 +11,8 @@ import PropTypes from 'prop-types';
 const initialState = {
   dataSlide: null,
   dataScroll: null,
-  dataTakwim: [],
+  // dataTakwim: null,
+  dataTakwim: { zone: 'WLY01', use24Hour: false, azanfile: "./video/azan.mp4" },
   dataMain: { place: "", milldata: "", message: '', commonfile: '', localfile: '', azanfile: '', speedmsg: 100, vidsch: {} },
   loading: false,
   error: null,
@@ -84,8 +85,9 @@ const ContextProvider = ({ children }) => {
   useEffect(() => {
     const yr = new Date().getFullYear();
     // fetchDataFromJSON('zone', "./json/zones.json");
-    fetchDataFromJSON('main', "./json/main.json");
-    fetchDataFromJSON('slide', "./json/slideshow.json");
+    // fetchDataFromJSON('main', "./json/main.json");
+    // fetchDataFromJSON('slide', "./json/slideshow.json");
+
     dispatch({ type: "FETCH_MESSAGE", payload: "Selamat datang ke TH Plantations Berhad " + yr });
 
   }, [fetchDataFromJSON]);

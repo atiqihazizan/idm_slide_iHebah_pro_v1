@@ -69,11 +69,8 @@ const Takwim = () => {
         period,
         wmasuk: currentData.wmasuk,
         blinkSolat: currentData.blinkSolat,
-        dot: currentData.dot,
       });
-
-      // console.log(currentData)
-
+      console.log(currentData)
       handleItems(currentData);
     };
 
@@ -140,9 +137,9 @@ const Takwim = () => {
       <div className="flex justify-between px-3 pt-2 h-[66px]">
         {timeData.jam && timeData.min && timeData.mdate && timeData.hdate && (
           <>
-            <div className={`flex flex-row font-semibold text-5xl text-center`}>
+            <div className={`flex flex-row font-semibold text-5xl text-center ${timeData.blinkSolat ? "animate-blinking" : ""}`}>
               <span className="w-auto text-right">{timeData.jam}</span>
-              <span className="w-[20px] leading-10 ">{timeData.dot}</span>
+              <span className="w-[20px] leading-10">:</span>
               <span className="w-auto text-left">{timeData.min}</span>
               {timeData.period && (
                 <span className="w-auto text-left ml-2 text-xl font-medium">{timeData.period}</span>
@@ -157,7 +154,7 @@ const Takwim = () => {
           </>
         )}
       </div>
-      <div className={`flex justify-between px-3 py-2 h-[58px] ${timeData.blinkSolat ? "animate-blinking text-red-600 font-bold" : ""}`}>
+      <div className={`flex justify-between px-3 py-2 h-[58px] ${timeData.blinkSolat ? "animate-blinking text-red-600" : ""}`}>
         {timeData.wnxt && (
           <>
             <span className="font-semibold text-2xl uppercase">
