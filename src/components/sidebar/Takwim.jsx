@@ -111,7 +111,7 @@ const Takwim = () => {
 
   return (
     <div className="min-h-[124px] px-4">
-      <div className="flex justify-between pt-2 h-[66px]">
+      <div className="flex justify-between pt-2 h-[56px]">
         {timeData.jam && timeData.min && timeData.mdate && timeData.hdate && (
           <>
             <div
@@ -121,7 +121,7 @@ const Takwim = () => {
               <span className="w-[20px] leading-10 ">{timeData.dot}</span>
               <span className="w-auto text-left">{timeData.min}</span>
               {timeData.period && (
-                <span className="w-auto text-left ml-2 text-xl font-medium">
+                <span className="w-auto text-left ml-2 text-xl font-normal self-end">
                   {timeData.period}
                 </span>
               )}

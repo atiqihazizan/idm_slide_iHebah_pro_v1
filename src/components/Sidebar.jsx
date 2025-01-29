@@ -5,7 +5,7 @@ import { useContextState } from '../contextState';
 
 const Sidebar = () => {
   const { loading } = useContextState()
-  return !loading && (<div className={`bg-sidebar min-w-[370px] max-w-[370px] text-white flex flex-col`}>
+  return !loading && (<div className={`bg-sidebar min-w-[380px] max-w-[370px] text-white flex flex-col`}>
     <Branding />
     <Takwim />
     <Showdata />
