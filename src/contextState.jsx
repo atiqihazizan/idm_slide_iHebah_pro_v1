@@ -105,9 +105,11 @@ const ContextProvider = ({ children }) => {
         setLoading(false);
       }
     };
-    setLoading(false)
-    // fetchData();
 
+    if (window.electronAPI) {
+      fetchData();
+      window.electronAPI.onDataUpdated(() => fetchData());
+    }
   }, []);
 
   // {

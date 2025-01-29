@@ -18,7 +18,6 @@ const Takwim = () => {
     dot: ':',
   });
   const [playedItems, setPlayedItems] = useState({ videos: {}, solatTimes: {} });
-  const [isInit, setIsInit] = useState(true)
 
   const setBlinking = (currentSec, solatTimes) => {
     const range = { before: 10 * 60, after: 15 * 60 };
@@ -30,27 +29,11 @@ const Takwim = () => {
   };
 
   const initializeWaktu = async () => {
-    setIsInit(true)
     try {
       if (!dataTakwim?.zone) throw new Error("Unknown zone");
       updateTime(await ReadWaktu(dataTakwim.zone));
-      setIsInit(false)
     } catch (error) {
       console.error("Error initializing waktu:", error.message);
-      // const fallback = HandleErrorZone();
-      // setTimeData({
-      //   jam: fallback.jam,
-      //   min: fallback.min,
-      //   dayn: fallback.dayn,
-      //   mdate: fallback.mdate,
-      //   hdate: fallback.hdate,
-      //   wnxt: { waktu: "", masa: "" },
-      //   period: "",
-      //   wmasuk: false,
-      //   allowAzan: false,
-      //   blinkSolat: false,
-      //   dot: ":"
-      // });
     }
   };
 
@@ -108,9 +91,8 @@ const Takwim = () => {
   };
 
   useEffect(() => {
-    if (!loading) initializeWaktu();
-
-    if (isInit) {
+    if (!loading) {
+      initializeWaktu();
       const interval = setInterval(() => updateTime(ShowTime()), 1000);
       return () => clearInterval(interval);
     }
@@ -128,8 +110,8 @@ const Takwim = () => {
   if (error) return <p>Error: {error}</p>;
 
   return (
-    <div className="min-h-[124px]">
-      <div className="flex justify-between px-3 pt-2 h-[66px]">
+    <div className="min-h-[124px] px-4">
+      <div className="flex justify-between pt-2 h-[66px]">
         {timeData.jam && timeData.min && timeData.mdate && timeData.hdate && (
           <>
             <div
@@ -153,8 +135,7 @@ const Takwim = () => {
           </>
         )}
       </div>
-      <div className={`flex justify-between px-3 py-2 h-[58px] ${timeData.blinkSolat ? "animate-blinking text-red-600" : ""
-        }`}>
+      <div className={`flex justify-between py-2 h-[58px] ${timeData.blinkSolat ? "animate-blinking text-red-600" : ""}`}>
         {timeData.wnxt && (
           <>
             <span className="font-semibold text-2xl uppercase">

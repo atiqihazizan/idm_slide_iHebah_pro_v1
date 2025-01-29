@@ -1,7 +1,7 @@
 
 const Branding = () => {
   return (
-    <div className="flex flex-row justify-between items-center pt-2 px-3 text-[17px] leading-7 min-h-[77px]">
+    <div className="flex flex-row justify-between items-center pt-3 px-4 text-[17px] leading-7 min-h-[77px]">
       <img src="./thlogo.png" className="w-[100px] animate-globe" />
       <div className="flex flex-col items-center">
         <span className="uppercase font-extrabold text-thp">
