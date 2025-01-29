@@ -4,6 +4,7 @@ import {
   useReducer,
   useEffect,
   useCallback,
+  useState,
 } from "react";
 import PropTypes from 'prop-types';
 
@@ -50,27 +51,7 @@ const reducer = (state, action) => {
 // Context provider
 const ContextProvider = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
-
-  // Fetch data from JSON
-  const fetchDataFromJSON = useCallback(async (type, url) => {
-    dispatch({ type: "FETCH_START" });
-    try {
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      if (type === 'slide') dispatch({ type: "FETCH_SLIDESHOW", payload: data });
-      if (type === 'main') {
-        const { message, zone, azanfile, vidsch, use24Hour, ...main } = data
-        dispatch({ type: "FETCH_MAIN", payload: main });
-        dispatch({ type: "FETCH_MESSAGE", payload: message });
-        dispatch({ type: "FETCH_TAKWIM", payload: { zone, azanfile, vidsch, use24Hour } });
-      }
-    } catch (error) {
-      dispatch({ type: "FETCH_FAILURE", payload: error.message });
-    }
-  }, []);
+  const [loading, setLoading] = useState(true);
 
   // Set global variable
   const setPopup = useCallback((value) => {
@@ -84,16 +65,83 @@ const ContextProvider = ({ children }) => {
   // Automatically fetch JSON on provider initialization
   useEffect(() => {
     const yr = new Date().getFullYear();
-    // fetchDataFromJSON('zone', "./json/zones.json");
-    // fetchDataFromJSON('main', "./json/main.json");
-    // fetchDataFromJSON('slide', "./json/slideshow.json");
-
     dispatch({ type: "FETCH_MESSAGE", payload: "Selamat datang ke TH Plantations Berhad " + yr });
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const {
+          generalData: {
+            slideshow: gslide,
+            schedule: gsche,
+            message: gmsg,
+            milldata,
+            azanfile,
+            use24Hour,
+            ...gData
+          },
 
-  }, [fetchDataFromJSON]);
+          localData: {
+            slideshow: lslide,
+            schedule: lsche,
+            message: lmsg,
+            topic,
+            zone,
+            ...lData
+          }
+        } = await window.electronAPI.getInitialData();
+
+        const main = { ...gData, ...lData, milldata: `${milldata}/?${topic}` }
+        const message = `${gmsg} ${lmsg}`;
+        const takwim = { zone, azanfile, use24Hour, vidsch: [...gsche, ...lsche] }
+        const slider = [...gslide, ...lslide]
+
+        dispatch({ type: "FETCH_MAIN", payload: main });
+        dispatch({ type: "FETCH_MESSAGE", payload: message });
+        dispatch({ type: "FETCH_TAKWIM", payload: takwim });
+        dispatch({ type: "FETCH_SLIDESHOW", payload: slider });
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    setLoading(false)
+    // fetchData();
+
+  }, []);
+
+  // {
+  //   "message": "SELAMAT DATANG KE TH PLANTATIONS BERHAD",
+  //   "milldata": "https://www.thplantations.my/",
+  //   "azanfile": "./video/azan.mp4",
+  //   "speedmsg": 300,
+  //   "use24Hour": true,
+  //   "schedule": [
+  //     {
+  //       "time": "08:00",
+  //       "file": "./video/doa_sebelum_kerja.mp4"
+  //     },
+  //   ],
+  //   "slideshow": [
+  //     {
+  //       "type": "image",
+  //       "time": 1,
+  //       "src": "./images/bg0.png",
+  //       "title": "Welcome Indoor Digital Media"
+  //     }
+  //   ]
+  // }
+  // {
+  //   "place": "THP HQ KL",
+  //   "zone": "WLY01",
+  //   "message": "",
+  //   "topic": "",
+  //   "schedule": [],
+  //   "slideshow": []
+  // }
 
   return (
-    <ContextState.Provider value={{ ...state, setPopup, setPath }}>
+    <ContextState.Provider value={{ ...state, setPopup, setPath, loading }}>
       {children}
     </ContextState.Provider>
   );

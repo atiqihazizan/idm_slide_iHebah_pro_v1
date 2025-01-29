@@ -65,9 +65,7 @@ const Slider = () => {
 
   useEffect(() => {
     setPause(true)
-    if (dataSlide) {
-      setSliderData(dataSlide);
-    }
+    if (dataSlide) setSliderData(dataSlide);
     const checkSlider = setInterval(() => {
       if (slideRef.current) {
         imageSlider.reload();

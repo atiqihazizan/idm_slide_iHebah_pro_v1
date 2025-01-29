@@ -18,6 +18,7 @@ const Takwim = () => {
     dot: ':',
   });
   const [playedItems, setPlayedItems] = useState({ videos: {}, solatTimes: {} });
+  const [isInit, setIsInit] = useState(true)
 
   const setBlinking = (currentSec, solatTimes) => {
     const range = { before: 10 * 60, after: 15 * 60 };
@@ -29,9 +30,11 @@ const Takwim = () => {
   };
 
   const initializeWaktu = async () => {
+    setIsInit(true)
     try {
       if (!dataTakwim?.zone) throw new Error("Unknown zone");
       updateTime(await ReadWaktu(dataTakwim.zone));
+      setIsInit(false)
     } catch (error) {
       console.error("Error initializing waktu:", error.message);
       // const fallback = HandleErrorZone();
@@ -52,7 +55,6 @@ const Takwim = () => {
   };
 
   const updateTime = (currentData) => {
-    // if (!currentData) currentData = HandleErrorZone();
     const use24Hour = dataTakwim?.use24Hour;
     const jam = use24Hour ? currentData.jam24 : currentData.jam;
     const wnxt = use24Hour
@@ -107,9 +109,12 @@ const Takwim = () => {
 
   useEffect(() => {
     if (!loading) initializeWaktu();
-    const interval = setInterval(() => updateTime(ShowTime()), 1000);
-    return () => clearInterval(interval);
-  }, [dataTakwim, playedItems]);
+
+    if (isInit) {
+      const interval = setInterval(() => updateTime(ShowTime()), 1000);
+      return () => clearInterval(interval);
+    }
+  }, [loading, dataTakwim, playedItems]);
 
   useEffect(() => {
     const resetPlayedData = () => setPlayedItems({ videos: {}, solatTimes: {} });
@@ -148,7 +153,7 @@ const Takwim = () => {
           </>
         )}
       </div>
-      <div className={`flex justify-between px-3 py-2 h-[58px] ${timeData.blinkSolat ? "animate-blinking" : ""
+      <div className={`flex justify-between px-3 py-2 h-[58px] ${timeData.blinkSolat ? "animate-blinking text-red-600" : ""
         }`}>
         {timeData.wnxt && (
           <>
