@@ -110,8 +110,8 @@ const Takwim = () => {
   if (error) return <p>Error: {error}</p>;
 
   return (
-    <div className="min-h-[124px] px-4">
-      <div className="flex justify-between pt-2 h-[56px]">
+    <div className="min-h-[110px] px-4 pt-3 flex flex-col justify-between">
+      <div className="flex justify-between h-[50px]">
         {timeData.jam && timeData.min && timeData.mdate && timeData.hdate && (
           <>
             <div
@@ -121,7 +121,7 @@ const Takwim = () => {
               <span className="w-[20px] leading-10 ">{timeData.dot}</span>
               <span className="w-auto text-left">{timeData.min}</span>
               {timeData.period && (
-                <span className="w-auto text-left ml-2 text-xl font-normal self-end">
+                <span className="w-auto text-left ml-2 text-sm font-normal self-end">
                   {timeData.period}
                 </span>
               )}
@@ -135,7 +135,7 @@ const Takwim = () => {
           </>
         )}
       </div>
-      <div className={`flex justify-between py-2 h-[58px] ${timeData.blinkSolat ? "animate-blinking text-red-600" : ""}`}>
+      <div className={`flex justify-between py-2 h-[50px] ${timeData.blinkSolat ? "animate-blinking text-red-600" : ""}`}>
         {timeData.wnxt && (
           <>
             <span className="font-semibold text-2xl uppercase">
