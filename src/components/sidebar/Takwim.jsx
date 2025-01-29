@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { HandleErrorZone, ReadWaktu, ShowTime } from "../../assets/ipray";
+import { ReadWaktu, ShowTime } from "../../assets/ipray";
 import { useContextState } from "../../contextState";
 
 const Takwim = () => {
@@ -13,122 +13,109 @@ const Takwim = () => {
     wnxt: { waktu: "", masa: "" },
     period: "",
     wmasuk: false,
+    allowAzan: false,
     blinkSolat: false,
+    dot: ':',
   });
-  const [playedItems, setPlayedItems] = useState({ videos: {}, solatTimes: {} }); // Menggabungkan video dan solat
+  const [playedItems, setPlayedItems] = useState({ videos: {}, solatTimes: {} });
 
-  useEffect(() => {
-    if (loading) return () => { };
-    const initializeWaktu = async () => {
-      try {
-        if (dataTakwim?.zone) {
-          const waktuData = await ReadWaktu(dataTakwim?.zone || "");
-          updateTime(waktuData);
-        } else {
-          throw new Error("Unknown zone");
-        }
-      } catch (error) {
-        console.error("Error initializing waktu:", error.message);
-        const fallbackTimeData = HandleErrorZone();
-        setTimeData({
-          jam: fallbackTimeData.jam,
-          min: fallbackTimeData.min,
-          dayn: fallbackTimeData.dayn,
-          mdate: fallbackTimeData.mdate,
-          hdate: fallbackTimeData.hdate,
-          wnxt: { waktu: "", masa: "" },
-          period: "",
-          wmasuk: false,
-          blinkSolat: false,
-        });
+  const setBlinking = (currentSec, solatTimes) => {
+    const range = { before: 10 * 60, after: 15 * 60 };
+    return solatTimes.some((solat) => {
+      const [hour, min] = solat.masa.split(":").map(Number);
+      const solatSec = hour * 3600 + min * 60;
+      return currentSec >= solatSec - range.before && currentSec <= solatSec + range.after;
+    });
+  };
+
+  const initializeWaktu = async () => {
+    try {
+      if (!dataTakwim?.zone) throw new Error("Unknown zone");
+      updateTime(await ReadWaktu(dataTakwim.zone));
+    } catch (error) {
+      console.error("Error initializing waktu:", error.message);
+      // const fallback = HandleErrorZone();
+      // setTimeData({
+      //   jam: fallback.jam,
+      //   min: fallback.min,
+      //   dayn: fallback.dayn,
+      //   mdate: fallback.mdate,
+      //   hdate: fallback.hdate,
+      //   wnxt: { waktu: "", masa: "" },
+      //   period: "",
+      //   wmasuk: false,
+      //   allowAzan: false,
+      //   blinkSolat: false,
+      //   dot: ":"
+      // });
+    }
+  };
+
+  const updateTime = (currentData) => {
+    // if (!currentData) currentData = HandleErrorZone();
+    const use24Hour = dataTakwim?.use24Hour;
+    const jam = use24Hour ? currentData.jam24 : currentData.jam;
+    const wnxt = use24Hour
+      ? { waktu: currentData.wnxt24?.waktu || "", masa: currentData.wnxt24?.masa || "--:--" }
+      : { waktu: currentData.wnxt?.waktu || "", masa: currentData.wnxt?.masa || "--:--" };
+    const currentSec = parseInt(currentData.jam24) * 3600 + parseInt(currentData.min) * 60;
+    const solatTimes = currentData.wsolat24 || [];
+
+    setTimeData({
+      jam,
+      min: currentData.min || "--",
+      dayn: currentData.dayn || "--",
+      mdate: currentData.mdate || "--",
+      hdate: currentData.hdate || "--",
+      wnxt,
+      dot: currentData.dot,
+      period: use24Hour ? "" : currentData.period,
+      wmasuk: currentData.wmasuk,
+      allowAzan: currentData.allowAzan,
+      blinkSolat: setBlinking(currentSec, solatTimes),
+    });
+
+    handleItems(currentData);
+  };
+
+  const handleItems = (currentData) => {
+    const currentTime = `${currentData.jam24}:${currentData.min}`;
+    const schedule = dataTakwim?.vidsch?.sch || [];
+    const solatTimes = currentData.wsolat24 || [];
+
+    schedule.forEach((item) => {
+      if (item.time === currentTime && item.file && !playedItems.videos[item.time]) {
+        setPopup(true);
+        setPath(item.file);
+        setPlayedItems((prev) => ({ ...prev, videos: { ...prev.videos, [item.time]: true } }));
       }
-    };
+    });
 
-    const updateTime = (currentData) => {
-      if (!currentData) currentData = HandleErrorZone();
-      const use24Hour = dataTakwim?.use24Hour || false;
-      const jam = use24Hour ? currentData.jam24 : currentData.jam;
-      const wnxt = use24Hour
-        ? {
-          waktu: currentData.wnxt24?.waktu || "",
-          masa: currentData.wnxt24?.masa || "--:--",
-        }
-        : {
-          waktu: currentData.wnxt?.waktu || "",
-          masa: currentData.wnxt.masa || "--:--",
-        };
-      const period = use24Hour ? "" : currentData.period;
-
-      setTimeData({
-        jam,
-        min: currentData.min || "--",
-        dayn: currentData.dayn || "--",
-        mdate: currentData.mdate || "--",
-        hdate: currentData.hdate || "--",
-        wnxt,
-        period,
-        wmasuk: currentData.wmasuk,
-        blinkSolat: currentData.blinkSolat,
-        dot: currentData.dot,
-      });
-
-      // console.log(currentData)
-
-      handleItems(currentData);
-    };
-
-    const handleItems = (currentData) => {
-      const currentTime = `${currentData.jam24}:${currentData.min}`;
-      const schedule = dataTakwim?.vidsch?.sch || [];
-      const solatTimes = currentData.wsolat24 || [];
-
-      // Handle video schedule
-      schedule.forEach((item) => {
-        if (item.time === currentTime && item.file && !playedItems.videos[item.time]) {
-          console.log(`Playing scheduled video: ${item.file}`);
-          setPopup(true);
-          setPath(item.file);
-          setPlayedItems((prev) => ({ ...prev, videos: { ...prev.videos, [item.time]: true } }));
-        }
-      });
-
-      // Handle solat times
-      solatTimes.forEach((solat) => {
-        if (solat.masa === currentTime && !playedItems.solatTimes[solat.masa]) {
-          console.log(`Masuk waktu solat: ${solat.waktu}`);
+    solatTimes.forEach((solat) => {
+      if (solat.masa === currentTime && !playedItems.solatTimes[solat.masa]) {
+        if (currentData.allowAzan) {
           setPopup(true);
           setPath(dataTakwim?.azanfile);
-          setPlayedItems((prev) => ({ ...prev, solatTimes: { ...prev.solatTimes, [solat.masa]: true } }));
         }
-      });
-    };
+        setPlayedItems((prev) => ({
+          ...prev,
+          solatTimes: { ...prev.solatTimes, [solat.masa]: true },
+        }));
+      }
+    });
+  };
 
-    initializeWaktu();
-    const timeInterval = setInterval(() => updateTime(ShowTime()), 1000);
-    return () => clearInterval(timeInterval);
+  useEffect(() => {
+    if (!loading) initializeWaktu();
+    const interval = setInterval(() => updateTime(ShowTime()), 1000);
+    return () => clearInterval(interval);
   }, [dataTakwim, playedItems]);
 
   useEffect(() => {
-    const resetPlayedData = () => {
-      const deviceTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      const isValidTimezone = dataTakwim?.zone === deviceTimezone;
-
-      if (!isValidTimezone) {
-        console.warn(
-          `Timezone mismatch! Device timezone: ${deviceTimezone}, Expected timezone: ${dataTakwim?.zone}`
-        );
-      }
-
-      setPlayedItems({ videos: {}, solatTimes: {} });
-    };
-
-    const now = new Date();
+    const resetPlayedData = () => setPlayedItems({ videos: {}, solatTimes: {} });
     const millisUntilMidnight =
-      new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0) -
-      now;
-
+      new Date(new Date().setHours(24, 0, 0, 0)) - new Date();
     const timer = setTimeout(resetPlayedData, millisUntilMidnight);
-
     return () => clearTimeout(timer);
   }, [dataTakwim]);
 
@@ -140,12 +127,16 @@ const Takwim = () => {
       <div className="flex justify-between px-3 pt-2 h-[66px]">
         {timeData.jam && timeData.min && timeData.mdate && timeData.hdate && (
           <>
-            <div className={`flex flex-row font-semibold text-5xl text-center`}>
+            <div
+              className={`flex flex-row font-semibold text-5xl text-center`}
+            >
               <span className="w-auto text-right">{timeData.jam}</span>
               <span className="w-[20px] leading-10 ">{timeData.dot}</span>
               <span className="w-auto text-left">{timeData.min}</span>
               {timeData.period && (
-                <span className="w-auto text-left ml-2 text-xl font-medium">{timeData.period}</span>
+                <span className="w-auto text-left ml-2 text-xl font-medium">
+                  {timeData.period}
+                </span>
               )}
             </div>
             <div className="flex flex-col items-end text-[15px]">
@@ -157,7 +148,8 @@ const Takwim = () => {
           </>
         )}
       </div>
-      <div className={`flex justify-between px-3 py-2 h-[58px] ${timeData.blinkSolat ? "animate-blinking text-red-600 font-bold" : ""}`}>
+      <div className={`flex justify-between px-3 py-2 h-[58px] ${timeData.blinkSolat ? "animate-blinking" : ""
+        }`}>
         {timeData.wnxt && (
           <>
             <span className="font-semibold text-2xl uppercase">

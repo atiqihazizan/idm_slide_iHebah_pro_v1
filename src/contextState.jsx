@@ -113,3 +113,5 @@ ContextProvider.propTypes = {
 };
 
 export { useContextState, ContextProvider }
+
+export default ContextState;
