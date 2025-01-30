@@ -14,7 +14,7 @@ const initialState = {
   dataScroll: null,
   // dataTakwim: null,
   dataTakwim: { zone: 'WLY01', use24Hour: false, azanfile: "./video/azan.mp4" },
-  dataMain: { place: "", milldata: "", message: '', commonfile: '', localfile: '', azanfile: '', speedmsg: 100, vidsch: {} },
+  dataMain: { place: "", milldata: "", message: '', commonfile: '', localfile: '', azanfile: '', speedmsg: 100, schedule: [] },
   loading: false,
   error: null,
   isPopup: null, // Variabel global tambahan
@@ -69,42 +69,55 @@ const ContextProvider = ({ children }) => {
     const fetchData = async () => {
       try {
         setLoading(true);
+
+        // Dapatkan data dari Electron API, pastikan tidak null/undefined
+        const data = (await window.electronAPI.getInitialData()) ?? { generalData: {}, localData: {} };
+
         const {
           generalData: {
-            slideshow: gslide,
-            schedule: gsche,
-            message: gmsg,
-            milldata,
-            azanfile,
-            use24Hour,
+            slideshow: gslide = [],
+            schedule: gsche = [],
+            message: gmsg = "",
+            milldata = "",
+            azanfile = "",
+            use24Hour = false,
             ...gData
-          },
+          } = {},
 
           localData: {
-            slideshow: lslide,
-            schedule: lsche,
-            message: lmsg,
-            topic,
-            zone,
+            slideshow: lslide = [],
+            schedule: lsche = [],
+            message: lmsg = "",
+            topic = "",
+            zone = "",
             ...lData
-          }
-        } = await window.electronAPI.getInitialData();
+          } = {}
+        } = data;
 
-        const main = { ...gData, ...lData, milldata: `${milldata}/?${topic}` }
+        // Pastikan data tidak menyebabkan error jika ada nilai undefined
+        const main = { ...gData, ...lData, milldata: `${milldata}${topic}` };
         const message = `${gmsg} ${lmsg}`;
-        const takwim = { zone, azanfile, use24Hour, vidsch: [...gsche, ...lsche] }
-        const slider = [...gslide, ...lslide]
+        const takwim = {
+          zone,
+          azanfile,
+          use24Hour,
+          schedule: [...(Array.isArray(gsche) ? gsche : []), ...(Array.isArray(lsche) ? lsche : [])]
+        };
+        const slider = [...(Array.isArray(gslide) ? gslide : []), ...(Array.isArray(lslide) ? lslide : [])];
 
+        // Hantar data ke reducer
         dispatch({ type: "FETCH_MAIN", payload: main });
         dispatch({ type: "FETCH_MESSAGE", payload: message });
         dispatch({ type: "FETCH_TAKWIM", payload: takwim });
         dispatch({ type: "FETCH_SLIDESHOW", payload: slider });
+
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
     };
+
 
     if (window.electronAPI) {
       fetchData();

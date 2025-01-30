@@ -65,7 +65,7 @@ const Takwim = () => {
 
   const handleItems = (currentData) => {
     const currentTime = `${currentData.jam24}:${currentData.min}`;
-    const schedule = dataTakwim?.vidsch?.sch || [];
+    const schedule = dataTakwim?.schedule || [];
     const solatTimes = currentData.wsolat24 || [];
 
     schedule.forEach((item) => {
