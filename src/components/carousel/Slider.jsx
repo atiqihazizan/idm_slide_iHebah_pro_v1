@@ -29,11 +29,11 @@ const Slider = () => {
 
   const playCurrentVideo = () => {
     const video = videoRef.current;
-    const src = sliderData[currentIndex].video
+    const path = sliderData[currentIndex].path
     if (video) {
       setPause(true)
       video.currentTime = 0;
-      video.src = src;
+      video.src = path;
       video.muted = true;
       video.play().catch((error) => console.warn(error));
       video.muted = false;
@@ -91,7 +91,7 @@ const Slider = () => {
             <a href='#'>
               <img src={img.src} />
               <iframe
-                src={img.url}
+                src={img.path}
                 style={{ display: 'block', position: 'absolute', width: '100%', height: '100%', border: 0, zIndex: 1 }}
                 allowFullScreen
               ></iframe>
