@@ -6,7 +6,7 @@ import '../../assets/js-image-slider/js-image-slider.css';
 const Slider = () => {
   const slideRef = useRef();
   const videoRef = useRef();
-  const { dataSlide, loading, error } = useContextState()
+  const { dataSlide, loading, error } = useContextState();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [pause, setPause] = useState(true);
   const [isFirstTime, setIsFirstTime] = useState(true);
@@ -18,7 +18,7 @@ const Slider = () => {
       "title": "Welcome Indoor Digital Media",
       "path": ""
     }
-  ])
+  ]);
   const minSlideTime = 2500;
 
   const nextSlide = () => {
@@ -29,19 +29,18 @@ const Slider = () => {
 
   const playCurrentVideo = () => {
     const video = videoRef.current;
-    const path = sliderData[currentIndex].path
+    const path = sliderData[currentIndex].path;
     if (video) {
-      setPause(true)
+      setPause(true);
       video.currentTime = 0;
       video.src = path;
       video.muted = true;
       video.play().catch((error) => console.warn(error));
       video.muted = false;
-      // video.volume = 0.25;
       videoRef.current.onended = () => {
-        setPause(false)
+        setPause(false);
         nextSlide();
-      }
+      };
     }
   };
 
@@ -64,7 +63,7 @@ const Slider = () => {
   }, [currentIndex, pause]);
 
   useEffect(() => {
-    setPause(true)
+    setPause(true);
     if (dataSlide) setSliderData(dataSlide);
     const checkSlider = setInterval(() => {
       if (slideRef.current) {
@@ -83,7 +82,6 @@ const Slider = () => {
     <div ref={slideRef} id="slider" className='flex-shrink'>
       {sliderData?.map((img, idx) => (
         <Fragment key={idx}>
-          {/* <a key={idx} className={img.type !== 'image' ? 'video' : 'lazyImage'} href={img.src}> */}
           {img.type === 'image' && (
             <img src={img.src} />
           )}
@@ -92,22 +90,21 @@ const Slider = () => {
               <img src={img.src} />
               <iframe
                 src={img.path}
-                style={{ display: 'block', position: 'absolute', width: '100%', height: '100%', border: 0, zIndex: 1 }}
+                className={currentIndex === idx ? 'opacity-100 transition-opacity duration-1000 absolute w-full h-full border-0 z-10' : 'opacity-0 transition-opacity duration-1000 absolute w-full h-full border-0 z-10'}
                 allowFullScreen
               ></iframe>
             </a>
           )}
           {img.type === 'video' && (
-            <a className='video' >
+            <a className='video'>
               <video
                 preload="none" data-image={img.src}
-                ref={currentIndex === idx ? videoRef : null} // Referensi hanya pada video aktif
+                ref={currentIndex === idx ? videoRef : null}
                 style={{ display: 'block', position: 'absolute', width: '100%', height: '100%', border: 0, zIndex: 1 }}
                 type="video/mp4"
               ></video>
             </a>
           )}
-          {/* </a> */}
         </Fragment>
       ))}
     </div>
