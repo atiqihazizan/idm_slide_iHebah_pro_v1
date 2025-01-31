@@ -1,7 +1,7 @@
-import { Fragment, useEffect, useRef, useState } from 'react';
-import { imageSlider } from '../../assets/js-image-slider/js-image-slider';
-import { useContextState } from '../../contextState';
-import '../../assets/js-image-slider/js-image-slider.css';
+import { Fragment, useEffect, useRef, useState } from "react";
+import { imageSlider } from "../../assets/js-image-slider/js-image-slider";
+import { useContextState } from "../../contextState";
+import "../../assets/js-image-slider/js-image-slider.css";
 
 const Slider = () => {
   const slideRef = useRef();
@@ -12,12 +12,12 @@ const Slider = () => {
   const [isFirstTime, setIsFirstTime] = useState(true);
   const [sliderData, setSliderData] = useState([
     {
-      "type": "image",
-      "time": "2",
-      "src": "./images/bg0.png",
-      "title": "Welcome Indoor Digital Media",
-      "path": ""
-    }
+      type: "image",
+      time: "2",
+      src: "./images/bg0.png",
+      title: "Welcome Indoor Digital Media",
+      path: "",
+    },
   ]);
   const minSlideTime = 2500;
 
@@ -47,7 +47,7 @@ const Slider = () => {
   useEffect(() => {
     if (!pause) {
       const currentImage = sliderData?.[currentIndex];
-      if (currentImage?.type === 'video') {
+      if (currentImage?.type === "video") {
         playCurrentVideo();
       } else if (currentImage) {
         const slideTime = isFirstTime
@@ -79,28 +79,38 @@ const Slider = () => {
   if (error) return <p>Error: {error}</p>;
 
   return (
-    <div ref={slideRef} id="slider" className='flex-shrink'>
+    <div ref={slideRef} id="slider" className="flex-shrink">
       {sliderData?.map((img, idx) => (
         <Fragment key={idx}>
-          {img.type === 'image' && (
-            <img src={img.src} />
-          )}
-          {img.type === 'iframe' && (
-            <a href='#'>
+          {img.type === "image" && <img src={img.src} />}
+          {img.type === "iframe" && (
+            <a href="#">
               <img src={img.src} />
               <iframe
                 src={img.path}
-                className={currentIndex === idx ? 'opacity-100 transition-opacity duration-1000 absolute w-full h-full border-0 z-10' : 'opacity-0 transition-opacity duration-1000 absolute w-full h-full border-0 z-10'}
+                className={
+                  currentIndex === idx
+                    ? "opacity-100 transition-opacity duration-1000 absolute w-full h-full border-0 z-10"
+                    : "opacity-0 transition-opacity duration-1000 absolute w-full h-full border-0 z-10"
+                }
                 allowFullScreen
               ></iframe>
             </a>
           )}
-          {img.type === 'video' && (
-            <a className='video'>
+          {img.type === "video" && (
+            <a className="video">
               <video
-                preload="none" data-image={img.src}
+                preload="none"
+                data-image={img.src}
                 ref={currentIndex === idx ? videoRef : null}
-                style={{ display: 'block', position: 'absolute', width: '100%', height: '100%', border: 0, zIndex: 1 }}
+                style={{
+                  display: "block",
+                  position: "absolute",
+                  width: "100%",
+                  height: "100%",
+                  border: 0,
+                  zIndex: 1,
+                }}
                 type="video/mp4"
               ></video>
             </a>

@@ -6,15 +6,24 @@ import {
   useCallback,
   useState,
 } from "react";
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 
 // Initial state
 const initialState = {
   dataSlide: null,
   dataScroll: null,
   // dataTakwim: null,
-  dataTakwim: { zone: 'WLY01', use24Hour: false, azanfile: "./video/azan.mp4" },
-  dataMain: { place: "", milldata: "", message: '', commonfile: '', localfile: '', azanfile: '', speedmsg: 100, schedule: [] },
+  dataTakwim: { zone: "WLY01", use24Hour: false, azanfile: "./video/azan.mp4" },
+  dataMain: {
+    place: "",
+    milldata: "",
+    message: "",
+    commonfile: "",
+    localfile: "",
+    azanfile: "",
+    speedmsg: 100,
+    schedule: [],
+  },
   loading: false,
   error: null,
   isPopup: null, // Variabel global tambahan
@@ -65,13 +74,19 @@ const ContextProvider = ({ children }) => {
   // Automatically fetch JSON on provider initialization
   useEffect(() => {
     const yr = new Date().getFullYear();
-    dispatch({ type: "FETCH_MESSAGE", payload: "Selamat datang ke TH Plantations Berhad " + yr });
+    dispatch({
+      type: "FETCH_MESSAGE",
+      payload: "Selamat datang ke TH Plantations Berhad " + yr,
+    });
     const fetchData = async () => {
       try {
         setLoading(true);
 
         // Dapatkan data dari Electron API, pastikan tidak null/undefined
-        const data = (await window.electronAPI.getInitialData()) ?? { generalData: {}, localData: {} };
+        const data = (await window.electronAPI.getInitialData()) ?? {
+          generalData: {},
+          localData: {},
+        };
 
         const {
           generalData: {
@@ -91,7 +106,7 @@ const ContextProvider = ({ children }) => {
             topic = "",
             zone = "",
             ...lData
-          } = {}
+          } = {},
         } = data;
 
         // Pastikan data tidak menyebabkan error jika ada nilai undefined
@@ -101,16 +116,21 @@ const ContextProvider = ({ children }) => {
           zone,
           azanfile,
           use24Hour,
-          schedule: [...(Array.isArray(gsche) ? gsche : []), ...(Array.isArray(lsche) ? lsche : [])]
+          schedule: [
+            ...(Array.isArray(gsche) ? gsche : []),
+            ...(Array.isArray(lsche) ? lsche : []),
+          ],
         };
-        const slider = [...(Array.isArray(gslide) ? gslide : []), ...(Array.isArray(lslide) ? lslide : [])];
+        const slider = [
+          ...(Array.isArray(gslide) ? gslide : []),
+          ...(Array.isArray(lslide) ? lslide : []),
+        ];
 
         // Hantar data ke reducer
         dispatch({ type: "FETCH_MAIN", payload: main });
         dispatch({ type: "FETCH_MESSAGE", payload: message });
         dispatch({ type: "FETCH_TAKWIM", payload: takwim });
         dispatch({ type: "FETCH_SLIDESHOW", payload: slider });
-
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -118,42 +138,47 @@ const ContextProvider = ({ children }) => {
       }
     };
 
-
     if (window.electronAPI) {
       fetchData();
       window.electronAPI.onDataUpdated(() => fetchData());
+    } else {
+      setLoading(false);
+      // Pastikan data tidak menyebabkan error jika ada nilai undefined
+      const message = "SELAMAT DATANG KE TH PLANTATIONS BERHAD";
+      const main = {
+        place: "THP HQ KL",
+        milldata: "https://www.thplantations.my/",
+        topic: "",
+        speedmsg: 300,
+      };
+
+      const takwim = {
+        zone: "WLY01",
+        azanfile: "./video/azan.mp4",
+        use24Hour: true,
+        schedule: [
+          {
+            time: "08:00",
+            file: "./video/doa_sebelum_kerja.mp4",
+          },
+        ],
+      };
+      const slider = [
+        {
+          type: "image",
+          time: 1,
+          src: "./images/bg0.png",
+          title: "Welcome Indoor Digital Media",
+        },
+      ];
+
+      // Hantar data ke reducer
+      dispatch({ type: "FETCH_MAIN", payload: main });
+      dispatch({ type: "FETCH_MESSAGE", payload: message });
+      dispatch({ type: "FETCH_TAKWIM", payload: takwim });
+      dispatch({ type: "FETCH_SLIDESHOW", payload: slider });
     }
   }, []);
-
-  // {
-  //   "message": "SELAMAT DATANG KE TH PLANTATIONS BERHAD",
-  //   "milldata": "https://www.thplantations.my/",
-  //   "azanfile": "./video/azan.mp4",
-  //   "speedmsg": 300,
-  //   "use24Hour": true,
-  //   "schedule": [
-  //     {
-  //       "time": "08:00",
-  //       "file": "./video/doa_sebelum_kerja.mp4"
-  //     },
-  //   ],
-  //   "slideshow": [
-  //     {
-  //       "type": "image",
-  //       "time": 1,
-  //       "src": "./images/bg0.png",
-  //       "title": "Welcome Indoor Digital Media"
-  //     }
-  //   ]
-  // }
-  // {
-  //   "place": "THP HQ KL",
-  //   "zone": "WLY01",
-  //   "message": "",
-  //   "topic": "",
-  //   "schedule": [],
-  //   "slideshow": []
-  // }
 
   return (
     <ContextState.Provider value={{ ...state, setPopup, setPath, loading }}>
@@ -172,9 +197,9 @@ const useContextState = () => {
 };
 
 ContextProvider.propTypes = {
-  children: PropTypes.node.isRequired
+  children: PropTypes.node.isRequired,
 };
 
-export { useContextState, ContextProvider }
+export { useContextState, ContextProvider };
 
 export default ContextState;
