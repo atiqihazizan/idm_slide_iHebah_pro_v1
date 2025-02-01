@@ -15,18 +15,12 @@ const Takwim = () => {
     wmasuk: false,
     allowAzan: false,
     blinkSolat: false,
-    dot: ':',
+    dot: ":",
   });
-  const [playedItems, setPlayedItems] = useState({ videos: {}, solatTimes: {} });
-
-  const setBlinking = (currentSec, solatTimes) => {
-    const range = { before: 10 * 60, after: 15 * 60 };
-    return solatTimes.some((solat) => {
-      const [hour, min] = solat.masa.split(":").map(Number);
-      const solatSec = hour * 3600 + min * 60;
-      return currentSec >= solatSec - range.before && currentSec <= solatSec + range.after;
-    });
-  };
+  const [playedItems, setPlayedItems] = useState({
+    videos: {},
+    solatTimes: {},
+  });
 
   const initializeWaktu = async () => {
     try {
@@ -37,14 +31,50 @@ const Takwim = () => {
     }
   };
 
+  const setBlinking = (currTimeMin, solatTimes) => {
+    if (solatTimes === false) return false;
+    const [hour, min] = solatTimes.split(":").map(Number); // Ambil waktu solat
+    const solatTimeMin = hour * 60 + min; // Tukar waktu solat ke minit
+
+    const leftMin = solatTimeMin - currTimeMin; // Baki masa sebelum solat
+    const passedMin = currTimeMin - solatTimeMin; // Masa sudah berlalu selepas solat
+
+    // Fungsi untuk menukarkan minit ke format jam, minit, dan saat
+    const convertToHoursMinutesSeconds = (minutes) => {
+      const hours = Math.floor(minutes / 60);
+      const mins = minutes % 60;
+      // const secs = Math.floor((minutes - Math.floor(minutes)) * 60);
+      return `${hours} jam ${mins} minit`;
+    };
+
+    console.log(convertToHoursMinutesSeconds(leftMin), solatTimes);
+
+    const rangeBefore = 10,
+      rangeAfter = 5;
+
+    return (
+      (leftMin <= rangeBefore && leftMin > 0) ||
+      (passedMin <= rangeAfter && passedMin > 0)
+    );
+  };
+
   const updateTime = (currentData) => {
     const use24Hour = dataTakwim?.use24Hour;
     const jam = use24Hour ? currentData.jam24 : currentData.jam;
     const wnxt = use24Hour
-      ? { waktu: currentData.wnxt24?.waktu || "", masa: currentData.wnxt24?.masa || "--:--" }
-      : { waktu: currentData.wnxt?.waktu || "", masa: currentData.wnxt?.masa || "--:--" };
-    const currentSec = parseInt(currentData.jam24) * 3600 + parseInt(currentData.min) * 60;
-    const solatTimes = currentData.wsolat24 || [];
+      ? {
+          waktu: currentData.wnxt24?.waktu || "",
+          masa: currentData.wnxt24?.masa || "--:--",
+        }
+      : {
+          waktu: currentData.wnxt?.waktu || "",
+          masa: currentData.wnxt?.masa || "--:--",
+        };
+
+    // Tukar currentSec kepada minit
+    const currTimeMin =
+      parseInt(currentData.jam24) * 60 + parseInt(currentData.min);
+    const solatTimes = currentData.wnxt24?.masa || false;
 
     setTimeData({
       jam,
@@ -57,7 +87,7 @@ const Takwim = () => {
       period: use24Hour ? "" : currentData.period,
       wmasuk: currentData.wmasuk,
       allowAzan: currentData.allowAzan,
-      blinkSolat: setBlinking(currentSec, solatTimes),
+      blinkSolat: setBlinking(currTimeMin, solatTimes),
     });
 
     handleItems(currentData);
@@ -69,10 +99,17 @@ const Takwim = () => {
     const solatTimes = currentData.wsolat24 || [];
 
     schedule.forEach((item) => {
-      if (item.time === currentTime && item.file && !playedItems.videos[item.time]) {
+      if (
+        item.time === currentTime &&
+        item.file &&
+        !playedItems.videos[item.time]
+      ) {
         setPopup(true);
         setPath(item.file);
-        setPlayedItems((prev) => ({ ...prev, videos: { ...prev.videos, [item.time]: true } }));
+        setPlayedItems((prev) => ({
+          ...prev,
+          videos: { ...prev.videos, [item.time]: true },
+        }));
       }
     });
 
@@ -97,9 +134,11 @@ const Takwim = () => {
       return () => clearInterval(interval);
     }
   }, [loading, dataTakwim, playedItems]);
+  // }, [loading]);
 
   useEffect(() => {
-    const resetPlayedData = () => setPlayedItems({ videos: {}, solatTimes: {} });
+    const resetPlayedData = () =>
+      setPlayedItems({ videos: {}, solatTimes: {} });
     const millisUntilMidnight =
       new Date(new Date().setHours(24, 0, 0, 0)) - new Date();
     const timer = setTimeout(resetPlayedData, millisUntilMidnight);
@@ -114,9 +153,7 @@ const Takwim = () => {
       <div className="flex justify-between h-[50px]">
         {timeData.jam && timeData.min && timeData.mdate && timeData.hdate && (
           <>
-            <div
-              className={`flex flex-row font-semibold text-5xl text-center`}
-            >
+            <div className={`flex flex-row font-semibold text-5xl text-center`}>
               <span className="w-auto text-right">{timeData.jam}</span>
               <span className="w-[20px] leading-10 ">{timeData.dot}</span>
               <span className="w-auto text-left">{timeData.min}</span>
@@ -135,7 +172,11 @@ const Takwim = () => {
           </>
         )}
       </div>
-      <div className={`flex justify-between py-2 h-[50px] ${timeData.blinkSolat ? "animate-blinking text-red-600" : ""}`}>
+      <div
+        className={`flex justify-between py-2 h-[50px] ${
+          timeData.blinkSolat ? "animate-blinking text-red-600" : ""
+        }`}
+      >
         {timeData.wnxt && (
           <>
             <span className="font-semibold text-2xl uppercase">
